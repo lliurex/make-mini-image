@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+
+echo "Running update-kernels ..."
+
+if [ "x${VERBOSE}" = "x0" ]; then
+    exec &> /dev/null 
+fi
+
+ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME}  /usr/share/ltsp/update-kernels
+
+if [ "$?" -ne 0 ]; then
+    exit 1
+fi
+
+
+exit 0

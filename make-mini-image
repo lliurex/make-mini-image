@@ -1,0 +1,8 @@
+#!/bin/bash
+source ./functions 
+
+/usr/bin/time -f "Time elapsed: %E" run-parts --exit-on-error -- config 
+
+if [ "$?" != "0" ]; then
+    exitting
+fi

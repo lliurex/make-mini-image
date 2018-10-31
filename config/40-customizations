@@ -1,0 +1,41 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+
+echo "Customizing ..."
+
+cat > ./${BASE}/${NAME}/etc/lsb_release << _EOF
+DISTRIB_ID=LliureX
+DISTRIB_RELEASE=19
+DISTRIB_CODENAME=bionic
+DISTRIB_DESCRIPTION="LliureX 19 Bionic Mini-Light-Client"
+_EOF
+
+if [ "$?" != "0" ]; then
+    exit 1
+fi
+
+cat > ./${BASE}/${NAME}/etc/issue << _EOF
+ LliureX 19 (mini-light-client) \n \l
+ With great power comes great responsibility! 
+
+_EOF
+
+if [ "$?" != "0" ]; then
+    exit 1
+fi
+
+cat > ./${BASE}/${NAME}/etc/issue.net << _EOF
+LliureX 19 (mini-light-client)
+
+_EOF
+
+if [ "$?" != "0" ]; then
+    exit 1
+fi
+
+exit 0

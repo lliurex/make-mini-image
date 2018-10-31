@@ -1,0 +1,45 @@
+#!/bin/bash
+
+source CONFIG
+source functions
+
+ensure BASE ARCH NAME IN_RAM
+
+if [ "${IN_RAM}" = "1" ]; then
+    mkdir -p ./${BASE}
+    mount -t tmpfs none ./${BASE} -o size=3G,exec,suid,dev
+fi
+
+OPTS=""
+
+if exists MIRROR; then
+    OPTS+=" --mirror ${MIRROR} "
+#    OPTS+=" --early-mirror ${MIRROR} "
+fi
+if exists EXTRA_MIRROR; then
+    OPTS+=" --extra-mirror ${EXTRA_MIRROR} "
+    if exists EXTRA_MIRROR_KEY; then
+	OPTS+=" --apt-keys ${EXTRA_MIRROR_KEY}"
+    fi
+fi
+
+echo "Bootstrapping ..."
+
+if [ "x${VERBOSE}" = "x0" ]; then
+    exec &> /dev/null 
+else
+    set -x
+fi
+
+ltsp-build-client --arch ${ARCH} --accept-unsigned-packages --chroot ${NAME} --base ./${BASE} --locale es --skipimage ${OPTS}
+
+if [ "x${VERBOSE}" != "x0" ]; then
+    set +x
+fi
+
+if [ "$?" != "0" ]; then
+    exitting
+fi
+
+
+exit 0

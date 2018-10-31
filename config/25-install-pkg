@@ -1,0 +1,57 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+#lliurex-shutdowner
+FIXED_PACKAGES=" ntp lmd-client epoptes-client lliurex-zero-shutdown-client n4d n4d-lliurex-base language-pack-ca lliurex-grub-custom lliurex-artwork-plymouth-desktop ltsp-client-core "
+
+if exists PACKAGES; then
+    PACKAGES+=" ${FIXED_PACKAGES} "
+else
+    PACKAGES=" ${FIXED_PACKAGES} "
+fi
+
+OPTS=""
+if [ "x${VERBOSE}" = "x0" ]; then
+    echo "Installing ..."
+    exec &> /dev/null 
+else
+    echo "Installing ... ${PACKAGES}"
+fi
+
+cat > ./${BASE}/${NAME}/script.sh << _EOF
+export DEBIAN_FRONTEND=noninteractive
+
+echo ldap-auth-config	ldap-auth-config/override	boolean	true | debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/bindpw	password	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/rootbindpw	password	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/binddn	string	cn=proxyuser,dc=example,dc=net	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/move-to-debconf	boolean	true	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/ldapns/ldap-server	string	ldap://server/	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/ldapns/base-dn	string	dc=ma5,dc=lliurex,dc=net	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/dbrootlogin	boolean	true	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/dblogin	boolean	false	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/pam_password	select	md5	| debconf-set-selections
+echo libpam-runtime	libpam-runtime/profiles	multiselect	unix, ldap, systemd	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/ldapns/ldap_version	select	3	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/rootbinddn	string	cn=admin,dc=ma5,dc=lliurex,dc=net	| debconf-set-selections
+echo ldap-auth-config	ldap-auth-config/override	boolean	true	| debconf-set-selections
+
+
+apt-get -y update
+apt-get -y install ${PACKAGES}
+_EOF
+
+
+ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME} bash /script.sh
+
+if [ "$?" != "0" ]; then
+    exit 1
+fi
+
+rm -f ./${BASE}/${NAME}/script.sh
+
+exit 0

@@ -1,0 +1,35 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+
+echo "Setting locale ..."
+
+cat > ./${BASE}/${NAME}/script.sh << _EOF
+
+export DEBIAN_FRONTEND=noninteractive
+
+echo locales locales/default_environment_locale	select	es_ES.UTF-8	> /tmp/locales.preseed
+
+debconf-set-selections /tmp/locales.preseed
+
+dpkg-reconfigure -u -f noninteractive locales
+
+_EOF
+
+if [ "x${VERBOSE}" = "x0" ]; then
+    exec &> /dev/null 
+fi
+
+ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME} bash /script.sh
+
+if [ "$?" != "0" ]; then
+    exit 1
+fi
+
+rm -f ./${BASE}/${NAME}/script.sh
+
+exit 0

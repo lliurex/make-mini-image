@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+
+echo "Setting pinning ..."
+
+cat > ./${BASE}/${NAME}/etc/apt/preferences.d/pinning << _EOF
+Package: *
+Pin: release o=LliureX
+Pin-Priority: 666
+
+_EOF
+
+if [ "$?" != "0" ]; then
+    exit 1
+fi
+
+exit 0

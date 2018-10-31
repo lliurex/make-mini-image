@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE ARCH NAME ROOTPASSWD
+
+echo "Setting root password ..."
+
+if [ "x${VERBOSE}" = "x0" ]; then
+    exec &> /dev/null 
+else
+    set -x
+fi
+
+ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME} bash -c "echo root:${ROOTPASSWD}|chpasswd"
+RET=$?
+
+if [ "x${VERBOSE}" != "x0" ]; then
+    set -x
+fi
+
+if [ "$RET" != "0" ]; then
+    exit 1
+fi
+
+exit 0

@@ -1,0 +1,25 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+
+echo "Cleaning space ..."
+#ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME} cp -R /lib/modules /lib/modules.old
+#ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME} apt-get -y remove --purge 'linux-image*'
+#ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME} apt-get -y autoremove
+#ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME} apt-get clean
+#ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME} cp -R /lib/modules.old /lib/modules
+rm -rf ./${BASE}/${NAME}/var/lib/apt/lists/*
+rm -rf ./${BASE}/${NAME}/var/lib/aptitude/*
+rm -rf ./${BASE}/${NAME}/lib/firmware/*
+rm -rf ./${BASE}/${NAME}/usr/share/doc/*
+
+
+rm -f ./${BASE}/${NAME}/etc/update-motd.d/10-help-text
+rm -f ./${BASE}/${NAME}/etc/legal
+rm -f ./${BASE}/${NAME}/tmp/*
+
+exit 0

@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+echo Fixing bionic lmd
+mkdir -p ./${BASE}/${NAME}/var/cache/
+ln -s /run/ltsp ./${BASE}/${NAME}/var/cache/ltsp
+
+exit 0

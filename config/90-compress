@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+
+mv ./${BASE}/${NAME} ./${BASE}/mini-light-client
+
+CUR_DIR=$(pwd)
+
+pushd ./${BASE} &> /dev/null
+
+OPTS=""
+
+if [ "x${VERBOSE}" = "x1" ]; then
+      OPTS="-v"
+fi
+
+echo -n "Compressig mini-light-client.tar.lzma ..."
+#tar -c ${OPTS} --lzma -f ${CUR_DIR}/mini-light-client.tar.lzma mini-light-client
+tar Oc mini-light-client | pxz -D 12 -cv - > ${CUR_DIR}/mini-light-client.tar.lzma
+if [ "$?" != "0" ]; then
+    exit 1
+fi
+
+SIZE=$(ls -lh ${CUR_DIR}/mini-light-client.tar.lzma | cut -d' ' -f5)
+
+echo "SIZE=${SIZE}"
+
+popd &> /dev/null
+
+exit 0

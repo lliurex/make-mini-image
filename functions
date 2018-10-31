@@ -1,0 +1,51 @@
+source CONFIG
+
+ensure(){
+    while [ "$#" -gt 0 ]; do
+	if [ -z "${!1}" ]; then
+	    echo "Need ${1} defined in CONFIG, exitting.."
+	    exit 1
+	fi
+	shift 
+    done
+}
+
+exists(){
+    local ret=0
+    while [ "$#" -gt 0 ]; do
+	if [ -z "${!1}" ]; then
+	    ret=1
+	fi
+	shift 
+    done
+    return ${ret}
+}
+
+exitting(){
+
+if [ "x${CLEAN_BASE}" = "x0" ]; then
+    exit 0
+fi
+
+ensure BASE
+
+if [ ! -d ./${BASE} ]; then
+    popd &> /dev/null
+fi
+if [ -d ./${BASE} ]; then 
+    if [ "${IN_RAM}" = "1" ]; then
+	umount -l ./${BASE} &> /dev/null
+	rmdir ./${BASE} &> /dev/null
+    else
+	rm -rf ./${BASE} &> /dev/null
+    fi
+    if [ -z "${1}" ]; then
+	exit 1
+    else
+	echo ${1}
+	exit 0
+    fi
+fi
+}
+
+trap exitting QUIT KILL TERM INT

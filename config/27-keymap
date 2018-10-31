@@ -1,0 +1,66 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+
+echo "Setting keymap ..."
+
+echo "KEYMAP=es" > ./${BASE}/${NAME}/etc/vconsole.conf
+
+cat > ./${BASE}/${NAME}/script.sh << _EOF
+
+export DEBIAN_FRONTEND=noninteractive
+cat << EOF > /tmp/console.preseed
+keyboard-configuration	keyboard-configuration/store_defaults_in_debconf_db	boolean	true
+keyboard-configuration	keyboard-configuration/layoutcode	string	es
+keyboard-configuration	keyboard-configuration/modelcode	string	pc105
+keyboard-configuration	keyboard-configuration/compose	select	No compose key
+keyboard-configuration	keyboard-configuration/xkb-keymap	select
+keyboard-configuration	keyboard-configuration/altgr	select	The default for the keyboard layout
+keyboard-configuration	console-setup/detected	note
+keyboard-configuration	keyboard-configuration/model	select PC genérico 105 teclas (intl)
+keyboard-configuration	keyboard-configuration/unsupported_config_layout	boolean	true
+keyboard-configuration	keyboard-configuration/unsupported_config_options	boolean	true
+keyboard-configuration	keyboard-configuration/variant	select	Español
+keyboard-configuration	keyboard-configuration/unsupported_layout	boolean	true
+keyboard-configuration	keyboard-configuration/unsupported_options	boolean	true
+keyboard-configuration	keyboard-configuration/variantcode	string	es_ES.UTF-8
+keyboard-configuration	keyboard-configuration/toggle	select	No toggling
+keyboard-configuration	keyboard-configuration/layout	select	Español
+keyboard-configuration	keyboard-configuration/switch	select	No temporary switch
+keyboard-configuration	console-setup/detect	detect-keyboard
+keyboard-configuration	keyboard-configuration/optionscode	string	terminate:ctrl_alt_bksp
+keyboard-configuration	keyboard-configuration/ctrl_alt_bksp	boolean	true
+keyboard-configuration	console-setup/ask_detect	boolean	false
+console-setup	console-setup/store_defaults_in_debconf_db	boolean	true
+console-setup	console-setup/fontsize	string	8x16
+console-setup	console-setup/charmap47	select	UTF-8
+console-setup	console-setup/codesetcode	string	guess
+console-setup	console-setup/fontsize-fb47	select	8x16
+console-setup	console-setup/codeset47	select	Guess optimal character set
+console-setup	console-setup/fontsize-text47	select	8x16
+console-setup	console-setup/fontface47	select	Fixed
+EOF
+
+debconf-set-selections /tmp/console.preseed
+dpkg-reconfigure -u -f noninteractive keyboard-configuration
+dpkg-reconfigure -u -f noninteractive console-setup
+rm -f /tmp/console.preseed
+_EOF
+
+if [ "x${VERBOSE}" = "x0" ]; then
+    exec &> /dev/null 
+fi
+
+ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME} bash /script.sh
+
+if [ "$?" != "0" ]; then
+    exit 1
+fi
+
+rm -f ./${BASE}/${NAME}/script.sh
+
+exit 0

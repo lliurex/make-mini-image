@@ -1,0 +1,16 @@
+BASE=tmp
+DISTRO=LliureX
+ARCH=amd64
+NAME=mini
+ROOTPASSWD=rootlliurexrootlliurex
+IN_RAM=1
+MIRROR=http://archive.ubuntu.com/ubuntu
+EXTRA_MIRROR=http://ppa.launchpad.net/llxdev/bionic/ubuntu
+EXTRA_MIRROR_KEY=`pwd`/ppa.gpg
+CUSTOM_REPO=http://172.20.8.6/mirror/bionic_foo
+IMAGE_WITH_PPA=0
+IMAGE_WITH_UBUNTU=1
+IMAGE_WITH_CUSTOM_REPO=1
+PACKAGES="aptitude mc nano debconf-utils"
+VERBOSE=1
+CLEAN_BASE=1

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+source CONFIG
+source functions
+
+echo "Umounting ..."
+
+if [ "x${VERBOSE}" = "x0" ]; then
+    exec &> /dev/null 
+else
+    set -x
+fi
+
+umount -l ./${BASE}/${NAME}/dev/pts
+umount -l ./${BASE}/${NAME}/proc
+
+if [ "x${VERBOSE}" != "x0" ]; then
+    set -x
+fi
+
+if [ "$?" != "0" ]; then
+    exitting
+fi
+
+
+exit 0

@@ -1,0 +1,55 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+
+
+PPA=""
+UBUNTU=""
+CUSTOM=""
+WITH=""
+
+if exists IMAGE_WITH_PPA ; then
+    if [ "${IMAGE_WITH_PPA}" = "1" ]; then
+	PPA="deb [trusted=yes] http://ppa.launchpad.net/llxdev/bionic/ubuntu bionic main"
+	WITH+=" ppa"
+    fi
+fi
+
+if exists IMAGE_WITH_UBUNTU ; then
+    if [ "${IMAGE_WITH_UBUNTU}" = "1" ]; then
+	UBUNTU="deb http://es.archive.ubuntu.com/ubuntu bionic main universe multiverse"
+	WITH+=" ubuntu"
+    fi
+fi
+
+if exists IMAGE_WITH_CUSTOM_REPO ; then
+    if [ "x${IMAGE_WITH_CUSTOM_REPO}" = "x1" ]; then
+	if [ -n "${CUSTOM_REPO}" ]; then
+	    CUSTOM="deb [trusted=yes] ${CUSTOM_REPO} bionic main universe multiverse"
+	    WITH+=" custom"
+	fi
+    fi
+fi
+
+echo "Setting up repos ... ${WITH}"
+
+cat > ./${BASE}/${NAME}/etc/apt/sources.list << _EOF
+deb [trusted=yes] http://lliurex.net/bionic bionic main universe multiverse
+deb [trusted=yes] http://lliurex.net/bionic bionic-updates main universe multiverse
+deb [trusted=yes] http://lliurex.net/bionic bionic-security main universe multiverse
+${PPA}
+${UBUNTU}
+${CUSTOM}
+_EOF
+
+rm -f ./${BASE}/${NAME}/etc/apt/sources.list.d/*
+
+if [ "$?" != "0" ]; then
+    exit 1
+fi
+
+exit 0

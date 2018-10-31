@@ -1,0 +1,62 @@
+#!/bin/bash
+set -e 
+
+source CONFIG
+source functions
+
+ensure BASE NAME
+
+echo "Setting timezone ..."
+
+cat > ./${BASE}/${NAME}/script.sh << _EOF
+
+#set -x
+export DEBIAN_FRONTEND=noninteractive
+
+dpkg --purge --force-depends tzdata
+
+rm -f /etc/timezone
+rm -f /etc/localtime
+
+echo Europe/Madrid > /etc/timezone
+
+echo tzdata	tzdata/Zones/Europe	select	Madrid > /tmp/tzdata.preseed
+echo tzdata	tzdata/Areas	select	Europe >> /tmp/tzdata.preseed
+
+debconf-set-selections /tmp/tzdata.preseed
+
+apt-get update || true
+DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
+
+#if [ `cat /etc/timezone|grep Madrid|wc -l` != "1" ]; then
+#    echo Method 2
+#    echo set tzdata/Areas Europe | debconf-communicate
+#    echo set tzdata/Zones/Europe Madrid |debconf-communicate
+#    dpkg-reconfigure -f noninteractive tzdata
+#fi
+#
+#if [ `cat /etc/timezone|grep Madrid|wc -l` != "1" ]; then
+#    echo Method 3
+#    echo Europe/Madrid > /etc/timezone
+#    rm -f /etc/localtime
+#    ln -s /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+#fi
+#
+# Need D-BUS
+# timedatectl set-timezone Europe/Madrid
+
+_EOF
+
+if [ "x${VERBOSE}" = "x0" ]; then
+    exec &> /dev/null 
+fi
+
+ltsp-chroot --arch ${ARCH} --base ${BASE} -pcma ${NAME} bash /script.sh
+
+if [ "$?" != "0" ]; then
+    exit 1
+fi
+
+rm -f ./${BASE}/${NAME}/script.sh
+
+exit 0

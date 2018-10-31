@@ -1,0 +1,21 @@
+#!/bin/bash
+
+USER_ID=$(id -u)
+
+if [ $USER_ID -ne 0 ]; then
+    echo "This build needs run as root, exitting..."
+    exit 1
+fi
+
+DEPENDENCIES="ltsp-build-client ltsp-chroot apt-key apt pxz"
+
+echo "Checking dependencies ..."
+for prog in ${DEPENDENCIES}; do 
+    T=$(which ${prog})
+    if [ -z ${T} ]; then
+	echo "This build needs ${prog}, please install & run again"
+	exit 1
+    fi
+done
+
+exit 0
